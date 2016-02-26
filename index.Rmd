@@ -1,0 +1,76 @@
+---
+title       : Shiny Application and Reproducible Pitch
+subtitle    : How Many Days Between Different Dates
+author      : ShiShuhuan
+job         : 
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow      # 
+widgets     : []            # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+knit        : slidify::knit2slides
+---
+
+## Application Description
+
+This application calculates how many days between different Dates. Users will be required to input values in two boxes and the select two checkboxes. The results will be shown immediately in the main panel.
+
+--- .class #id 
+
+## Sample Results
+
+```{r}
+start_Date <- as.Date('2015-06-01')
+end_Date <- as.Date('2016-02-11')
+d <- difftime(end_Date,start_Date,units = "days")
+d
+```
+* Options
+```{r}
+is_include_sD <- TRUE
+is_include_eD <- TRUE
+max(as.numeric(d) + 1*is_include_sD+(is_include_eD-1),0)
+```
+
+--- .class #id 
+
+## ui.R
+```{r,cache=FALSE}
+shinyUI(pageWithSidebar(
+    headerPanel("How many days between different Dates"),
+    sidebarPanel(
+        dateInput("start_date", "Start Date:"),
+        dateInput("end_date", "End Date:"),
+        checkboxInput("id1", "Including Start Date",F),
+        checkboxInput("id2", "Including End Date",T)
+    ),
+    mainPanel(
+        h3('Outputs'),
+        h4('Start Date:'),
+        verbatimTextOutput("oid1"),
+        h4('End Date:'),
+        verbatimTextOutput("oid2"),
+        h4('Day Diff:'),
+        verbatimTextOutput("odate")
+    )
+))
+```
+
+--- .class #id 
+
+## sever.R
+```{r,cache=FALSE}
+shinyServer(
+    function(input, output) {
+        output$oid1 <- renderPrint({input$start_date})
+        output$oid2 <- renderPrint({input$end_date})
+        output$odate <- renderPrint({
+            if(input$start_date > input$end_date)
+                "Start Date should be early !"
+            else 
+                max(as.numeric(difftime(input$end_date,input$start_date,
+                                        units = "days"))+1*input$id1+(input$id2-1),0)
+        })
+    }
+)
+```
