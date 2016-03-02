@@ -46,7 +46,7 @@
     <h2>Application Description</h2>
   </hgroup>
   <article data-timings="">
-    <p>This application calculates how many days between different Dates. Users will be required to input values in two boxes and the select two checkboxes. The results will be shown immediately in the main panel.</p>
+    <p>This application calculates how many days between different Dates.In <strong>output1</strong> Users choose <strong>Start Date</strong> and <strong>End Date</strong>,then consider weather include these days in the calculation.In <strong>output2</strong> Users input a Date and decide regard this Date as <strong>Start Date</strong> or <strong>End Date</strong>.After inputing a diff, you will get the Date you want.</p>
 
   </article>
   <!-- Presenter Notes -->
@@ -87,82 +87,54 @@ max(as.numeric(d) + 1*is_include_sD+(is_include_eD-1),0)
     <h2>ui.R</h2>
   </hgroup>
   <article data-timings="">
-    <pre><code class="r">shinyUI(pageWithSidebar(
-    headerPanel(&quot;How many days between different Dates&quot;),
-    sidebarPanel(
-        dateInput(&quot;start_date&quot;, &quot;Start Date:&quot;),
-        dateInput(&quot;end_date&quot;, &quot;End Date:&quot;),
-        checkboxInput(&quot;id1&quot;, &quot;Including Start Date&quot;,F),
-        checkboxInput(&quot;id2&quot;, &quot;Including End Date&quot;,T)
-    ),
-    mainPanel(
-        h3(&#39;Outputs&#39;),
-        h4(&#39;Start Date:&#39;),
-        verbatimTextOutput(&quot;oid1&quot;),
-        h4(&#39;End Date:&#39;),
-        verbatimTextOutput(&quot;oid2&quot;),
-        h4(&#39;Day Diff:&#39;),
-        verbatimTextOutput(&quot;odate&quot;)
-    )
-))
+    <pre><code class="r">shinyUI(
+    navbarPage(
+        &quot;How many days between different Dates&quot;,
+        tabsetPanel(
+            tabPanel(&quot;Documents&quot;,
+                     mainPanel(
+                         includeHTML(&quot;Documents.html&quot;)
+                         )
+                     ),
+            tabPanel(&quot;Output1&quot;,
+                     sidebarPanel(
+                         dateInput(&quot;start_date1&quot;, &quot;Start Date:&quot;),
+                         dateInput(&quot;end_date1&quot;, &quot;End Date:&quot;),
+                         checkboxInput(&quot;id11&quot;, &quot;Including Start Date&quot;,F),
+                         checkboxInput(&quot;id21&quot;, &quot;Including End Date&quot;,T)
+                         ),
+                     mainPanel(
+                         h3(&#39;Output1&#39;),
+                         h4(&#39;Start Date:&#39;),
+                         verbatimTextOutput(&quot;oid11&quot;),
+                         h4(&#39;End Date:&#39;),
+                         verbatimTextOutput(&quot;oid21&quot;),
+                         h4(&#39;Day Diff:&#39;),
+                         verbatimTextOutput(&quot;odate1&quot;)
+                         )
+                     ),
+            tabPanel(&quot;Output2&quot;,
+                     sidebarPanel(
+                         selectInput(&quot;SE&quot;,&quot;Start Date/End Date&quot;,list(&quot;Start Date&quot;,&quot;End Date&quot;)),
+                         dateInput(&quot;date&quot;, &quot;Date:&quot;),
+                         numericInput(&quot;diff&quot;,&quot;Day Diff:&quot;,value = 0,min = 0,step = 1)
+                         ),
+                     mainPanel(
+                         h3(&#39;Output2&#39;),
+                         h4(&#39;Start Date:&#39;),
+                         verbatimTextOutput(&quot;oid12&quot;),
+                         h4(&#39;End Date:&#39;),
+                         verbatimTextOutput(&quot;oid22&quot;),
+                         h4(&#39;Day Diff:&#39;),
+                         verbatimTextOutput(&quot;odate2&quot;)
+                         )
+                     )
+            )
+        ))   
 </code></pre>
 
-<p>&lt;!--html_preserve--&gt;<div class="container-fluid"></p>
-
-<div class="row">
-<div class="col-sm-12">
-<h1>How many days between different Dates</h1>
-</div>
-
-<p></div></p>
-
-<div class="row">
-<div class="col-sm-4">
-<form class="well">
-<div id="start_date" class="shiny-date-input form-group shiny-input-container">
-<label class="control-label" for="start_date">Start Date:</label>
-<input type="text" class="form-control datepicker" data-date-language="en" data-date-weekstart="0" data-date-format="yyyy-mm-dd" data-date-start-view="month"/>
-</div>
-
-<div id="end_date" class="shiny-date-input form-group shiny-input-container">
-<label class="control-label" for="end_date">End Date:</label>
-<input type="text" class="form-control datepicker" data-date-language="en" data-date-weekstart="0" data-date-format="yyyy-mm-dd" data-date-start-view="month"/>
-</div>
-
-<div class="form-group shiny-input-container">
-<div class="checkbox">
-<label>
-<input id="id1" type="checkbox"/>
-<span>Including Start Date</span>
-</label>
-</div>
-
-<p></div></p>
-
-<div class="form-group shiny-input-container">
-<div class="checkbox">
-<label>
-<input id="id2" type="checkbox" checked="checked"/>
-<span>Including End Date</span>
-</label>
-</div>
-
-<p></div>
-</form>
-</div></p>
-
-<div class="col-sm-8">
-<h3>Outputs</h3>
-<h4>Start Date:</h4>
-<pre id="oid1" class="shiny-text-output"></pre>
-<h4>End Date:</h4>
-<pre id="oid2" class="shiny-text-output"></pre>
-<h4>Day Diff:</h4>
-<pre id="odate" class="shiny-text-output"></pre>
-</div>
-
-<p></div>
-</div>&lt;!--/html_preserve--&gt;</p>
+<pre><code>## Error in eval(expr, envir, enclos): could not find function &quot;shinyUI&quot;
+</code></pre>
 
   </article>
   <!-- Presenter Notes -->
@@ -175,17 +147,34 @@ max(as.numeric(d) + 1*is_include_sD+(is_include_eD-1),0)
   <article data-timings="">
     <pre><code class="r">shinyServer(
     function(input, output) {
-        output$oid1 &lt;- renderPrint({input$start_date})
-        output$oid2 &lt;- renderPrint({input$end_date})
-        output$odate &lt;- renderPrint({
-            if(input$start_date &gt; input$end_date)
+        output$oid11 &lt;- renderPrint({input$start_date1})
+        output$oid21 &lt;- renderPrint({input$end_date1})
+        output$odate1 &lt;- renderPrint({
+            if(input$start_date1 &gt; input$end_date1)
                 &quot;Start Date should be early !&quot;
             else 
-                max(as.numeric(difftime(input$end_date,input$start_date,
-                                        units = &quot;days&quot;))+1*input$id1+(input$id2-1),0)
+                max(as.numeric(difftime(input$end_date1,input$start_date1,units = &quot;days&quot;))
+                    +1*input$id11+(input$id21-1),0)
         })
+        output$oid12 &lt;- renderPrint({
+            if(input$SE == &quot;Start Date&quot;)
+                input$date
+            else
+                input$date - input$diff
+        })
+        output$oid22 &lt;- renderPrint({
+            if(input$SE == &quot;End Date&quot;)
+                input$date
+            else
+                input$date + input$diff
+        })
+        output$odate2 &lt;- renderPrint({input$diff})
+
     }
 )
+</code></pre>
+
+<pre><code>## Error in eval(expr, envir, enclos): could not find function &quot;shinyServer&quot;
 </code></pre>
 
   </article>

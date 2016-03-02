@@ -13,7 +13,7 @@ knit        : slidify::knit2slides
 
 ## Application Description
 
-This application calculates how many days between different Dates. Users will be required to input values in two boxes and the select two checkboxes. The results will be shown immediately in the main panel.
+This application calculates how many days between different Dates.In **output1** Users choose **Start Date** and **End Date**,then consider weather include these days in the calculation.In **output2** Users input a Date and decide regard this Date as **Start Date** or **End Date**.After inputing a diff, you will get the Date you want.
 
 --- .class #id 
 
@@ -47,72 +47,55 @@ max(as.numeric(d) + 1*is_include_sD+(is_include_eD-1),0)
 ## ui.R
 
 ```r
-shinyUI(pageWithSidebar(
-    headerPanel("How many days between different Dates"),
-    sidebarPanel(
-        dateInput("start_date", "Start Date:"),
-        dateInput("end_date", "End Date:"),
-        checkboxInput("id1", "Including Start Date",F),
-        checkboxInput("id2", "Including End Date",T)
-    ),
-    mainPanel(
-        h3('Outputs'),
-        h4('Start Date:'),
-        verbatimTextOutput("oid1"),
-        h4('End Date:'),
-        verbatimTextOutput("oid2"),
-        h4('Day Diff:'),
-        verbatimTextOutput("odate")
-    )
-))
+shinyUI(
+    navbarPage(
+        "How many days between different Dates",
+        tabsetPanel(
+            tabPanel("Documents",
+                     mainPanel(
+                         includeHTML("Documents.html")
+                         )
+                     ),
+            tabPanel("Output1",
+                     sidebarPanel(
+                         dateInput("start_date1", "Start Date:"),
+                         dateInput("end_date1", "End Date:"),
+                         checkboxInput("id11", "Including Start Date",F),
+                         checkboxInput("id21", "Including End Date",T)
+                         ),
+                     mainPanel(
+                         h3('Output1'),
+                         h4('Start Date:'),
+                         verbatimTextOutput("oid11"),
+                         h4('End Date:'),
+                         verbatimTextOutput("oid21"),
+                         h4('Day Diff:'),
+                         verbatimTextOutput("odate1")
+                         )
+                     ),
+            tabPanel("Output2",
+                     sidebarPanel(
+                         selectInput("SE","Start Date/End Date",list("Start Date","End Date")),
+                         dateInput("date", "Date:"),
+                         numericInput("diff","Day Diff:",value = 0,min = 0,step = 1)
+                         ),
+                     mainPanel(
+                         h3('Output2'),
+                         h4('Start Date:'),
+                         verbatimTextOutput("oid12"),
+                         h4('End Date:'),
+                         verbatimTextOutput("oid22"),
+                         h4('Day Diff:'),
+                         verbatimTextOutput("odate2")
+                         )
+                     )
+            )
+        ))   
 ```
 
-<!--html_preserve--><div class="container-fluid">
-<div class="row">
-<div class="col-sm-12">
-<h1>How many days between different Dates</h1>
-</div>
-</div>
-<div class="row">
-<div class="col-sm-4">
-<form class="well">
-<div id="start_date" class="shiny-date-input form-group shiny-input-container">
-<label class="control-label" for="start_date">Start Date:</label>
-<input type="text" class="form-control datepicker" data-date-language="en" data-date-weekstart="0" data-date-format="yyyy-mm-dd" data-date-start-view="month"/>
-</div>
-<div id="end_date" class="shiny-date-input form-group shiny-input-container">
-<label class="control-label" for="end_date">End Date:</label>
-<input type="text" class="form-control datepicker" data-date-language="en" data-date-weekstart="0" data-date-format="yyyy-mm-dd" data-date-start-view="month"/>
-</div>
-<div class="form-group shiny-input-container">
-<div class="checkbox">
-<label>
-<input id="id1" type="checkbox"/>
-<span>Including Start Date</span>
-</label>
-</div>
-</div>
-<div class="form-group shiny-input-container">
-<div class="checkbox">
-<label>
-<input id="id2" type="checkbox" checked="checked"/>
-<span>Including End Date</span>
-</label>
-</div>
-</div>
-</form>
-</div>
-<div class="col-sm-8">
-<h3>Outputs</h3>
-<h4>Start Date:</h4>
-<pre id="oid1" class="shiny-text-output"></pre>
-<h4>End Date:</h4>
-<pre id="oid2" class="shiny-text-output"></pre>
-<h4>Day Diff:</h4>
-<pre id="odate" class="shiny-text-output"></pre>
-</div>
-</div>
-</div><!--/html_preserve-->
+```
+## Error in eval(expr, envir, enclos): could not find function "shinyUI"
+```
 
 --- .class #id 
 
@@ -121,15 +104,33 @@ shinyUI(pageWithSidebar(
 ```r
 shinyServer(
     function(input, output) {
-        output$oid1 <- renderPrint({input$start_date})
-        output$oid2 <- renderPrint({input$end_date})
-        output$odate <- renderPrint({
-            if(input$start_date > input$end_date)
+        output$oid11 <- renderPrint({input$start_date1})
+        output$oid21 <- renderPrint({input$end_date1})
+        output$odate1 <- renderPrint({
+            if(input$start_date1 > input$end_date1)
                 "Start Date should be early !"
             else 
-                max(as.numeric(difftime(input$end_date,input$start_date,
-                                        units = "days"))+1*input$id1+(input$id2-1),0)
+                max(as.numeric(difftime(input$end_date1,input$start_date1,units = "days"))
+                    +1*input$id11+(input$id21-1),0)
         })
+        output$oid12 <- renderPrint({
+            if(input$SE == "Start Date")
+                input$date
+            else
+                input$date - input$diff
+        })
+        output$oid22 <- renderPrint({
+            if(input$SE == "End Date")
+                input$date
+            else
+                input$date + input$diff
+        })
+        output$odate2 <- renderPrint({input$diff})
+
     }
 )
+```
+
+```
+## Error in eval(expr, envir, enclos): could not find function "shinyServer"
 ```
